@@ -136,12 +136,81 @@ export default function AdminApp() {
     else fetchWishes();
   };
 
-  const handleEditClick = (p) => {
-    setIsEditing(true);
-    setEditId(p.id);
-    setLabel(p.label);
-    setFile(null); // Force choose new if they want, else keep old
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const [compressing, setCompressing] = useState(false);
+  const [compressProgress, setCompressProgress] = useState({ total: 0, current: 0 });
+
+  const compressImage = (file, maxWidth, maxHeight) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/jpeg', 0.8);
+      };
+      img.onerror = reject;
+    });
+  };
+
+  const handleBulkCompress = async () => {
+    if (!window.confirm('Nén tất cả ảnh dự án về size 1000x1000? Quá trình này có thể mất vài phút.')) return;
+    
+    setCompressing(true);
+    const allItems = [...projects];
+    if (defaultAvatar) allItems.push(defaultAvatar);
+    
+    setCompressProgress({ total: allItems.length, current: 0 });
+
+    for (let i = 0; i < allItems.length; i++) {
+        const item = allItems[i];
+        try {
+            // 1. Download
+            const fileName = item.image_url.split('/').pop().split('?')[0]; // Remove timestamp if any
+            const { data, error } = await supabase.storage.from('images').download(fileName);
+            if (error) throw error;
+
+            // 2. Resize
+            const compressedBlob = await compressImage(data, 1000, 1000);
+
+            // 3. Re-upload with upsert
+            const { error: uploadError } = await supabase.storage.from('images').upload(fileName, compressedBlob, { upsert: true });
+            if (uploadError) throw uploadError;
+
+            // 4. Update DB with timestamp to bust cache
+            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+            const freshUrl = `${publicUrl}?t=${Date.now()}`;
+            await supabase.from('projects').update({ image_url: freshUrl }).eq('id', item.id);
+
+        } catch (e) {
+            console.error('Lỗi khi nén item:', item.label, e);
+        }
+        setCompressProgress(prev => ({ ...prev, current: i + 1 }));
+    }
+
+    alert('Đã hoàn thành nén tất cả ảnh!');
+    setCompressing(false);
+    fetchProjects();
   };
 
   if (!session) {
@@ -174,114 +243,134 @@ export default function AdminApp() {
   return (
     <div className="admin-dashboard">
       <div className="admin-header">
-        <h2>Quản lý Project Nodes</h2>
-        <button className="logout-btn" onClick={handleLogout}>
-          <LogOut size={16} /> Thoát
-        </button>
+        <div>
+          <h2>Quản lý Project Nodes</h2>
+          {compressing && (
+            <div style={{ color: '#00d2ff', fontSize: '0.9rem', marginTop: '5px' }}>
+              ⏳ Đang nén ảnh: {compressProgress.current}/{compressProgress.total}...
+              <div style={{ width: '200px', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '5px' }}>
+                <div style={{ width: `${(compressProgress.current / compressProgress.total) * 100}%`, height: '100%', background: '#00d2ff', borderRadius: '2px', transition: 'width 0.3s' }} />
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '15px' }}>
+            <button className="btn-save" onClick={handleBulkCompress} disabled={compressing} style={{ width: 'auto', padding: '10px 20px', background: 'rgba(0, 210, 255, 0.1)', border: '1px solid #00d2ff', color: '#00d2ff' }}>
+              🗜️ Nén tất cả ảnh
+            </button>
+            <button className="logout-btn" onClick={handleLogout}>
+              <LogOut size={16} /> Thoát
+            </button>
+        </div>
       </div>
 
       <div className="admin-content">
-        {/* Default Avatar Config Box */}
-        <div className="admin-form-card" style={{ marginBottom: '20px' }}>
-          <h3>Avatar Mặc Định Của Website</h3>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            {defaultAvatar ? (
-              <img src={defaultAvatar.image_url} alt="Default Avatar" style={{ width: 80, height: 80, borderRadius: '50%', border: '2px solid #00d2ff', objectFit: 'cover' }} />
-            ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems:'center', justifyContent: 'center' }}>Trống</div>
-            )}
-            <div style={{ flex: 1 }}>
-              <button 
-                className="btn-save" 
-                onClick={() => {
-                  setLabel('DEFAULT_AVATAR');
-                  setEditId(defaultAvatar ? defaultAvatar.id : null);
-                  setIsEditing(!!defaultAvatar);
-                  setFile(null);
-                }}
-              >
-                {defaultAvatar ? 'Thay đổi Avatar' : 'Thiết lập Avatar'}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="admin-form-card">
-          <h3>
-            {label === 'DEFAULT_AVATAR' ? 'Cập nhật Avatar Mặc Định' : (isEditing ? 'Chỉnh sửa Project' : 'Thêm mới Project')}
-          </h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Tên dự án (Label):</label>
-              <input type="text" value={label} onChange={e => setLabel(e.target.value)} required disabled={label === 'DEFAULT_AVATAR'} />
-            </div>
-            <div className="form-group">
-              <label>Hình ảnh (Image):</label>
-              <input type="file" accept="image/*" onChange={e => setFile(e.target.files[0])} required={!isEditing} />
-            </div>
-            <div className="form-actions">
-              {isEditing && (
-                <button type="button" className="btn-cancel" onClick={() => { setIsEditing(false); setLabel(''); setFile(null); }}>
-                  Hủy
-                </button>
+        <div className="admin-left-col">
+          {/* Default Avatar Config Box */}
+          <div className="admin-form-card" style={{ marginBottom: '20px' }}>
+            <h3>Avatar Mặc Định Của Website</h3>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              {defaultAvatar ? (
+                <img src={defaultAvatar.image_url} alt="Default Avatar" style={{ width: 80, height: 80, borderRadius: '50%', border: '2px solid #00d2ff', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems:'center', justifyContent: 'center' }}>Trống</div>
               )}
-              <button type="submit" className="btn-save" disabled={loading}>
-                {loading ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="admin-list-card">
-          <h3>Danh sách Projects ({projects.length})</h3>
-          <div className="admin-projects-grid">
-            {projects.map(p => (
-              <div key={p.id} className="admin-project-item">
-                <img src={p.image_url} alt={p.label} />
-                <div className="admin-project-info">
-                  <p>{p.label}</p>
-                </div>
-                <div className="admin-project-actions">
-                  <button onClick={() => handleEditClick(p)} className="btn-edit"><Edit2 size={16} /></button>
-                  <button onClick={() => handleDelete(p.id, p.image_url)} className="btn-delete"><Trash2 size={16} /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Wishes Moderation Section */}
-        <div className="admin-list-card wishes-moderation-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h3 style={{ margin: 0 }}>Quản lý Lời chúc ({wishes.length})</h3>
-            <input 
-              type="text" 
-              placeholder="🔍 Lọc lời chúc nhanh..." 
-              value={searchWish}
-              onChange={e => setSearchWish(e.target.value)}
-              style={{
-                padding: '8px 15px',
-                borderRadius: '8px',
-                border: '1px solid rgba(0, 210, 255, 0.3)',
-                background: 'rgba(0,0,0,0.5)',
-                color: 'white',
-                fontFamily: 'Unbounded, sans-serif'
-              }}
-            />
-          </div>
-          <div className="admin-wishes-list">
-            {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).map(w => (
-              <div key={w.id} className="admin-wish-item">
-                <div className="admin-wish-content">
-                  <p>{w.content}</p>
-                </div>
-                <button onClick={() => handleDeleteWish(w.id)} className="btn-delete-wish" title="Xóa lời chúc này">
-                  <Trash2 size={16} />
+              <div style={{ flex: 1 }}>
+                <button 
+                  className="btn-save" 
+                  onClick={() => {
+                    setLabel('DEFAULT_AVATAR');
+                    setEditId(defaultAvatar ? defaultAvatar.id : null);
+                    setIsEditing(!!defaultAvatar);
+                    setFile(null);
+                  }}
+                >
+                  {defaultAvatar ? 'Thay đổi Avatar' : 'Thiết lập Avatar'}
                 </button>
               </div>
-            ))}
-            {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).length === 0 && (
-              <p style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>Không tìm thấy lời chúc nào phù hợp.</p>
-            )}
+            </div>
+          </div>
+          
+          <div className="admin-form-card">
+            <h3>
+              {label === 'DEFAULT_AVATAR' ? 'Cập nhật Avatar Mặc Định' : (isEditing ? 'Chỉnh sửa Project' : 'Thêm mới Project')}
+            </h3>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Tên dự án (Label):</label>
+                <input type="text" value={label} onChange={e => setLabel(e.target.value)} required disabled={label === 'DEFAULT_AVATAR'} />
+              </div>
+              <div className="form-group">
+                <label>Hình ảnh (Image):</label>
+                <input type="file" accept="image/*" onChange={e => setFile(e.target.files[0])} required={!isEditing} />
+              </div>
+              <div className="form-actions">
+                {isEditing && (
+                  <button type="button" className="btn-cancel" onClick={() => { setIsEditing(false); setLabel(''); setFile(null); }}>
+                    Hủy
+                  </button>
+                )}
+                <button type="submit" className="btn-save" disabled={loading}>
+                  {loading ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div className="admin-right-col">
+          <div className="admin-list-card">
+            <h3>Danh sách Projects ({projects.length})</h3>
+            <div className="admin-projects-grid">
+              {projects.map(p => (
+                <div key={p.id} className="admin-project-item">
+                  <img src={p.image_url} alt={p.label} />
+                  <div className="admin-project-info">
+                    <p>{p.label}</p>
+                  </div>
+                  <div className="admin-project-actions">
+                    <button onClick={() => handleEditClick(p)} className="btn-edit"><Edit2 size={16} /></button>
+                    <button onClick={() => handleDelete(p.id, p.image_url)} className="btn-delete"><Trash2 size={16} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Wishes Moderation Section */}
+          <div className="admin-list-card wishes-moderation-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0 }}>Quản lý Lời chúc ({wishes.length})</h3>
+              <input 
+                type="text" 
+                placeholder="🔍 Lọc lời chúc nhanh..." 
+                value={searchWish}
+                onChange={e => setSearchWish(e.target.value)}
+                style={{
+                  padding: '8px 15px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(0, 210, 255, 0.3)',
+                  background: 'rgba(0,0,0,0.5)',
+                  color: 'white',
+                  fontFamily: 'Unbounded, sans-serif'
+                }}
+              />
+            </div>
+            <div className="admin-wishes-list">
+              {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).map(w => (
+                <div key={w.id} className="admin-wish-item">
+                  <div className="admin-wish-content">
+                    <p>{w.content}</p>
+                  </div>
+                  <button onClick={() => handleDeleteWish(w.id)} className="btn-delete-wish" title="Xóa lời chúc này">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).length === 0 && (
+                <p style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>Không tìm thấy lời chúc nào phù hợp.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
