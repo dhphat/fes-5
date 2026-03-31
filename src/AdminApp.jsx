@@ -10,6 +10,7 @@ export default function AdminApp() {
   
   const [projects, setProjects] = useState([]);
   const [wishes, setWishes] = useState([]);
+  const [searchWish, setSearchWish] = useState('');
   const [defaultAvatar, setDefaultAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   
@@ -250,19 +251,37 @@ export default function AdminApp() {
 
         {/* Wishes Moderation Section */}
         <div className="admin-list-card wishes-moderation-card">
-          <h3>Quản lý Lời chúc ({wishes.length})</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ margin: 0 }}>Quản lý Lời chúc ({wishes.length})</h3>
+            <input 
+              type="text" 
+              placeholder="🔍 Lọc lời chúc nhanh..." 
+              value={searchWish}
+              onChange={e => setSearchWish(e.target.value)}
+              style={{
+                padding: '8px 15px',
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 210, 255, 0.3)',
+                background: 'rgba(0,0,0,0.5)',
+                color: 'white',
+                fontFamily: 'Unbounded, sans-serif'
+              }}
+            />
+          </div>
           <div className="admin-wishes-list">
-            {wishes.map(w => (
+            {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).map(w => (
               <div key={w.id} className="admin-wish-item">
                 <div className="admin-wish-content">
                   <p>{w.content}</p>
-                  <small>{new Date(w.created_at).toLocaleString()}</small>
                 </div>
-                <button onClick={() => handleDeleteWish(w.id)} className="btn-delete-wish">
+                <button onClick={() => handleDeleteWish(w.id)} className="btn-delete-wish" title="Xóa lời chúc này">
                   <Trash2 size={16} />
                 </button>
               </div>
             ))}
+            {wishes.filter(w => w.content.toLowerCase().includes(searchWish.toLowerCase())).length === 0 && (
+              <p style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>Không tìm thấy lời chúc nào phù hợp.</p>
+            )}
           </div>
         </div>
       </div>
