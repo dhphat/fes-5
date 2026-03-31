@@ -55,10 +55,26 @@ export default function WishesScreen() {
     const w = newWish;
     setNewWish('');
     
+    // Optimistic UI push
+    const tempId = Math.random().toString();
+    const optimisticWish = {
+      id: tempId,
+      content: w,
+      left: Math.random() * 90,
+      fontSize: Math.random() * 14 + 16,
+      duration: Math.random() * 15 + 10,
+      delay: 0,
+      opacityBase: 1
+    };
+    
+    setWishes(prev => [optimisticWish, ...prev]);
+
     const { error } = await supabase.from('wishes').insert([{ content: w }]);
     if (error) {
       console.error(error);
       alert('Không thể gửi lời chúc, vui lòng thử lại.');
+      // Remove optimistic if failed
+      setWishes(prev => prev.filter(wish => wish.id !== tempId));
     }
   };
 

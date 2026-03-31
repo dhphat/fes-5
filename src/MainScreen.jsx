@@ -12,6 +12,7 @@ export default function MainScreen() {
 
   // User Customization
   const [userAvatar, setUserAvatar] = useState('/images/avatar.png');
+  const [hasCustomAvatar, setHasCustomAvatar] = useState(false);
   const [userName, setUserName] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
@@ -38,7 +39,11 @@ export default function MainScreen() {
     const fetchProjects = async () => {
       const { data, error } = await supabase.from('projects').select('*');
       if (data && !error) {
-        setProjectsData(data);
+        const defaultAva = data.find(p => p.label === 'DEFAULT_AVATAR');
+        setProjectsData(data.filter(p => p.label !== 'DEFAULT_AVATAR'));
+        if (defaultAva && !hasCustomAvatar) {
+          setUserAvatar(defaultAva.image_url);
+        }
       }
     };
     fetchProjects();
@@ -265,6 +270,7 @@ export default function MainScreen() {
       const reader = new FileReader();
       reader.onload = (ev) => {
         setUserAvatar(ev.target.result);
+        setHasCustomAvatar(true);
       };
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -274,22 +280,15 @@ export default function MainScreen() {
 
   const renderCircularText = () => {
     if (!userName) return null;
-    const chars = userName.toUpperCase().split('');
-    const radius = 70;
-    const step = 360 / chars.length;
     return (
-      <div className="circular-text">
-        {chars.map((char, index) => (
-          <span
-            key={index}
-            style={{
-              transform: `rotate(${index * step}deg) translate(0, -${radius}px)`
-            }}
-          >
-            {char}
-          </span>
-        ))}
-      </div>
+      <svg className="circular-text-svg" viewBox="0 0 200 200">
+        <path id="circlePath" d="M 100, 100 m -85, 0 a 85,85 0 1,1 170,0 a 85,85 0 1,1 -170,0" fill="none" />
+        <text fill="#00d2ff" fontSize="11" fontWeight="600" letterSpacing="1.5">
+          <textPath href="#circlePath" textAnchor="middle" startOffset="50%">
+            {userName.toUpperCase()}
+          </textPath>
+        </text>
+      </svg>
     );
   };
 

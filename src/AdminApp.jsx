@@ -9,6 +9,7 @@ export default function AdminApp() {
   const [password, setPassword] = useState('');
   
   const [projects, setProjects] = useState([]);
+  const [defaultAvatar, setDefaultAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   
   // Form add/edit
@@ -40,7 +41,9 @@ export default function AdminApp() {
   const fetchProjects = async () => {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: true });
     if (!error && data) {
-      setProjects(data);
+      const defaultAva = data.find(p => p.label === 'DEFAULT_AVATAR');
+      setDefaultAvatar(defaultAva || null);
+      setProjects(data.filter(p => p.label !== 'DEFAULT_AVATAR'));
     }
   };
 
@@ -161,12 +164,38 @@ export default function AdminApp() {
       </div>
 
       <div className="admin-content">
+        {/* Default Avatar Config Box */}
+        <div className="admin-form-card" style={{ marginBottom: '20px' }}>
+          <h3>Avatar Mặc Định Của Website</h3>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            {defaultAvatar ? (
+              <img src={defaultAvatar.image_url} alt="Default Avatar" style={{ width: 80, height: 80, borderRadius: '50%', border: '2px solid #00d2ff', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems:'center', justifyContent: 'center' }}>Trống</div>
+            )}
+            <div style={{ flex: 1 }}>
+              <button 
+                className="btn-save" 
+                onClick={() => {
+                  setLabel('DEFAULT_AVATAR');
+                  setEditId(defaultAvatar ? defaultAvatar.id : null);
+                  setIsEditing(!!defaultAvatar);
+                  setFile(null);
+                }}
+              >
+                {defaultAvatar ? 'Thay đổi Avatar' : 'Thiết lập Avatar'}
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="admin-form-card">
-          <h3>{isEditing ? 'Chỉnh sửa Project' : 'Thêm mới Project'}</h3>
+          <h3>
+            {label === 'DEFAULT_AVATAR' ? 'Cập nhật Avatar Mặc Định' : (isEditing ? 'Chỉnh sửa Project' : 'Thêm mới Project')}
+          </h3>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Tên dự án (Label):</label>
-              <input type="text" value={label} onChange={e => setLabel(e.target.value)} required />
+              <input type="text" value={label} onChange={e => setLabel(e.target.value)} required disabled={label === 'DEFAULT_AVATAR'} />
             </div>
             <div className="form-group">
               <label>Hình ảnh (Image):</label>
