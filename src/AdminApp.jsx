@@ -9,6 +9,7 @@ export default function AdminApp() {
   const [password, setPassword] = useState('');
   
   const [projects, setProjects] = useState([]);
+  const [wishes, setWishes] = useState([]);
   const [defaultAvatar, setDefaultAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   
@@ -35,6 +36,7 @@ export default function AdminApp() {
   useEffect(() => {
     if (session) {
       fetchProjects();
+      fetchWishes();
     }
   }, [session]);
 
@@ -44,6 +46,13 @@ export default function AdminApp() {
       const defaultAva = data.find(p => p.label === 'DEFAULT_AVATAR');
       setDefaultAvatar(defaultAva || null);
       setProjects(data.filter(p => p.label !== 'DEFAULT_AVATAR'));
+    }
+  };
+
+  const fetchWishes = async () => {
+    const { data, error } = await supabase.from('wishes').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      setWishes(data);
     }
   };
 
@@ -117,6 +126,13 @@ export default function AdminApp() {
     const { error } = await supabase.from('projects').delete().eq('id', id);
     if (error) alert(error.message);
     else fetchProjects();
+  };
+
+  const handleDeleteWish = async (id) => {
+    if (!window.confirm('Xoá lời chúc này?')) return;
+    const { error } = await supabase.from('wishes').delete().eq('id', id);
+    if (error) alert(error.message);
+    else fetchWishes();
   };
 
   const handleEditClick = (p) => {
@@ -227,6 +243,24 @@ export default function AdminApp() {
                   <button onClick={() => handleEditClick(p)} className="btn-edit"><Edit2 size={16} /></button>
                   <button onClick={() => handleDelete(p.id, p.image_url)} className="btn-delete"><Trash2 size={16} /></button>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Wishes Moderation Section */}
+        <div className="admin-list-card wishes-moderation-card">
+          <h3>Quản lý Lời chúc ({wishes.length})</h3>
+          <div className="admin-wishes-list">
+            {wishes.map(w => (
+              <div key={w.id} className="admin-wish-item">
+                <div className="admin-wish-content">
+                  <p>{w.content}</p>
+                  <small>{new Date(w.created_at).toLocaleString()}</small>
+                </div>
+                <button onClick={() => handleDeleteWish(w.id)} className="btn-delete-wish">
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
           </div>

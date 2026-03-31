@@ -33,36 +33,57 @@ body, html {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
+  background: linear-gradient(-45deg, #0f1c3f, #070914, #1b092a, #0b1a4a);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
 /* Background Effects */
 .space-bg {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background-image: 
-    radial-gradient(1.5px 1.5px at 10% 20%, #ffffff 100%, transparent),
-    radial-gradient(2px 2px at 30% 50%, rgba(255,255,255,0.8) 100%, transparent),
-    radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.9) 100%, transparent),
-    radial-gradient(2px 2px at 90% 80%, #ffffff 100%, transparent),
-    radial-gradient(1.5px 1.5px at 40% 90%, rgba(255,255,255,0.7) 100%, transparent),
-    radial-gradient(2px 2px at 80% 60%, rgba(255,255,255,0.6) 100%, transparent),
-    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.8) 100%, transparent),
-    radial-gradient(2.5px 2.5px at 20% 80%, rgba(255,255,255,0.9) 100%, transparent);
-  background-size: 150px 150px;
-  animation: starryBgTwinkle 4s ease-in-out infinite alternate;
-  z-index: 0;
   pointer-events: none;
+  z-index: 0;
+}
+
+.space-bg::before, .space-bg::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 15% 15%, #ffffff 100%, transparent),
+    radial-gradient(1.5px 1.5px at 25% 45%, rgba(255,255,255,0.8) 100%, transparent),
+    radial-gradient(2px 2px at 75% 35%, rgba(255,255,255,0.7) 100%, transparent),
+    radial-gradient(1.2px 1.2px at 90% 80%, rgba(255,255,255,0.6) 100%, transparent),
+    radial-gradient(2px 2px at 45% 90%, rgba(255,255,255,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 85% 65%, rgba(255,255,255,0.5) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 55% 20%, rgba(255,255,255,0.8) 100%, transparent),
+    radial-gradient(1px 1px at 35% 80%, rgba(255,255,255,1) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 5% 65%, rgba(255,255,255,0.8) 100%, transparent);
+  background-size: 100px 100px;
+  animation: starryBgTwinkle 4s ease-in-out infinite alternate;
+}
+
+.space-bg::after {
+  background-size: 170px 170px;
+  animation-duration: 6s;
+  animation-delay: 2s;
 }
 
 @keyframes starryBgTwinkle {
-  0% { opacity: 0.4; }
-  50% { opacity: 0.9; }
-  100% { opacity: 0.4; }
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
 }
 
 .aurora {
@@ -345,8 +366,8 @@ body, html {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 220px;
-  height: 220px;
+  width: 250px;
+  height: 250px;
   transform: translate(-50%, -50%);
   pointer-events: none;
   animation: rotateText 20s linear infinite;
@@ -385,7 +406,7 @@ body, html {
 
 .modal-content h2 {
   margin-bottom: 20px;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #00d2ff;
   text-align: center;
 }
@@ -426,6 +447,8 @@ body, html {
   border-radius: 8px;
   color: white;
   cursor: pointer;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.9rem;
   transition: all 0.3s;
 }
 
@@ -461,7 +484,7 @@ body, html {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: white;
-  font-family: inherit;
+  font-family: 'Unbounded', sans-serif;
   outline: none;
   transition: border-color 0.3s;
 }
@@ -486,6 +509,7 @@ body, html {
   border: none;
   border-radius: 8px;
   font-weight: bold;
+  font-family: 'Unbounded', sans-serif;
   font-size: 1rem;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -759,7 +783,9 @@ body, html {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
+  background: linear-gradient(-45deg, #0f1c3f, #070914, #1b092a, #0b1a4a);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
   overflow: hidden;
 }
 
@@ -873,4 +899,70 @@ body, html {
 
 .btn-send-fullscreen:hover {
   transform: translateY(-2px);
+}
+
+/* Admin Wishes List Styles */
+.wishes-moderation-card {
+  margin-top: 30px;
+}
+
+.admin-wishes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.admin-wishes-list::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-wishes-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 210, 255, 0.2);
+  border-radius: 10px;
+}
+
+.admin-wish-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: border-color 0.2s;
+}
+
+.admin-wish-item:hover {
+  border-color: rgba(0, 210, 255, 0.2);
+}
+
+.admin-wish-content p {
+  margin: 0;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.admin-wish-content small {
+  color: #666;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.btn-delete-wish {
+  background: none;
+  border: none;
+  color: #ff4757;
+  cursor: pointer;
+  padding: 8px;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn-delete-wish:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }

@@ -282,8 +282,8 @@ export default function MainScreen() {
     if (!userName) return null;
     return (
       <svg className="circular-text-svg" viewBox="0 0 200 200">
-        <path id="circlePath" d="M 100, 100 m -85, 0 a 85,85 0 1,1 170,0 a 85,85 0 1,1 -170,0" fill="none" />
-        <text fill="#00d2ff" fontSize="11" fontWeight="600" letterSpacing="1.5">
+        <path id="circlePath" d="M 100, 100 m -98, 0 a 98,98 0 1,1 196,0 a 98,98 0 1,1 -196,0" fill="none" />
+        <text fill="#00d2ff" fontSize="9" fontWeight="600" letterSpacing="0.8">
           <textPath href="#circlePath" textAnchor="middle" startOffset="50%">
             {userName.toUpperCase()}
           </textPath>
@@ -400,7 +400,7 @@ export default function MainScreen() {
 
         {/* Download Button */}
         {connections.length > 0 && (
-          <div className="download-container">
+          <div className="download-container" style={{ pointerEvents: 'auto' }}>
             <button className="download-btn" onClick={downloadImage}>
               Chụp ảnh kỷ niệm
             </button>
