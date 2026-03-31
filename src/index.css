@@ -277,3 +277,445 @@ body, html {
     linear-gradient(rgba(0,210,255,0.03) 1px, transparent 1px) 0 0 / 50px 50px;
   z-index: 1;
 }
+
+/* UI Overlay Controls */
+.ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 110;
+}
+
+.top-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 15px;
+  pointer-events: auto;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(11, 25, 44, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  background: rgba(0, 210, 255, 0.2);
+  border-color: rgba(0, 210, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+
+/* Avatar Wrappers & Circular Text */
+.avatar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #111;
+}
+
+.circular-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  animation: rotateText 15s linear infinite;
+  z-index: 25;
+}
+
+.circular-text span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00d2ff;
+  text-shadow: 0 0 5px #00d2ff;
+  white-space: pre;
+}
+
+@keyframes rotateText {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Modals */
+.modal-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #0f2040, #0a152d);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 16px;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(0, 210, 255, 0.1);
+  position: relative;
+  color: white;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #00d2ff;
+  text-align: center;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #b0c4de;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus {
+  border-color: #00d2ff;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 5px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #00d2ff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+}
+
+/* Wishes Modals adjustments */
+.wishes-modal {
+  max-width: 600px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wishes-view-area {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.floating-wish {
+  position: absolute;
+  bottom: -50px;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+  animation-name: floatUpWishes;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes floatUpWishes {
+  0% { transform: translateY(50px) scale(0.8); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-700px) scale(1.1); opacity: 0; }
+}
+
+.wishes-form {
+  display: flex;
+  gap: 10px;
+}
+
+.wishes-form input {
+  flex: 1;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  outline: none;
+}
+
+.wishes-form input:focus {
+  border-color: #00d2ff;
+}
+
+.btn-send {
+  padding: 0 20px;
+  background: #00d2ff;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-send:hover {
+  background: #3a7bd5;
+  color: white;
+}
+
+/* Admin App */
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: var(--primary);
+}
+
+.admin-login-form {
+  background: rgba(0,0,0,0.5);
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.admin-login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #00d2ff;
+}
+
+.admin-login-form input {
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+
+.admin-login-form button {
+  padding: 15px;
+  border-radius: 8px;
+  background: #00d2ff;
+  color: black;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-dashboard {
+  min-height: 100vh;
+  width: 100vw;
+  background: #050a14;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 20px;
+}
+
+.admin-header h2 {
+  color: #00d2ff;
+  font-size: 2rem;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 71, 87, 0.1);
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logout-btn:hover {
+  background: #ff4757;
+  color: white;
+}
+
+.admin-content {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 30px;
+}
+
+.admin-form-card, .admin-list-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.admin-form-card h3, .admin-list-card h3 {
+  margin-bottom: 20px;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-save {
+  flex: 1;
+  padding: 12px;
+  background: #00d2ff;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.admin-project-item {
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  transition: transform 0.2s;
+}
+.admin-project-item:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0,210,255,0.3);
+}
+
+.admin-project-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.admin-project-info {
+  padding: 12px;
+  text-align: center;
+}
+
+.admin-project-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  background: rgba(0,0,0,0.6);
+  padding: 5px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.btn-edit, .btn-delete {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+}
+.btn-edit:hover { color: #00d2ff; }
+.btn-delete:hover { color: #ff4757; }
