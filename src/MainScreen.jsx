@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { supabase } from './lib/supabase';
-import { Camera, Send, X, MessageCircleHeart } from 'lucide-react';
+import { Camera, X, MessageCircleHeart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './index.css';
 
 export default function MainScreen() {
@@ -14,10 +15,7 @@ export default function MainScreen() {
   const [userName, setUserName] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
-  // Wishes Tab
-  const [isWishesModalOpen, setIsWishesModalOpen] = useState(false);
-  const [wishes, setWishes] = useState([]);
-  const [newWish, setNewWish] = useState('');
+  const navigate = useNavigate();
 
   const connectionsRef = useRef(connections);
   const isDrawingRef = useRef(isDrawing);
@@ -43,41 +41,13 @@ export default function MainScreen() {
         setProjectsData(data);
       }
     };
-    const fetchWishes = async () => {
-      const { data, error } = await supabase.from('wishes').select('*').order('created_at', { ascending: false }).limit(50);
-      if (data && !error) {
-        // Add random properties for animation in CSS
-        const wishesWithMeta = data.map(wish => ({
-          ...wish,
-          left: Math.random() * 80 + 10, // 10% to 90%
-          fontSize: Math.random() * 10 + 16, // 16px to 26px
-          duration: Math.random() * 10 + 10, // 10s to 20s
-          delay: Math.random() * 10 // 0s to 10s delay
-        }));
-        setWishes(wishesWithMeta);
-      }
-    };
-
     fetchProjects();
-    fetchWishes();
 
     // Setup realtime logic if you want
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, (payload) => {
         fetchProjects();
-      })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes' }, (payload) => {
-        setWishes(prev => {
-          const newW = {
-            ...payload.new,
-            left: Math.random() * 80 + 10,
-            fontSize: Math.random() * 10 + 16,
-            duration: Math.random() * 10 + 10,
-            delay: 0
-          };
-          return [newW, ...prev];
-        });
       })
       .subscribe();
 
@@ -300,19 +270,7 @@ export default function MainScreen() {
     }
   };
 
-  const submitWish = async (e) => {
-    e.preventDefault();
-    if (!newWish.trim()) return;
-    const w = newWish;
-    setNewWish('');
-    
-    // Optimistic UI could be added, but we wait for insert or postgres_changes
-    const { error } = await supabase.from('wishes').insert([{ content: w }]);
-    if (error) {
-      console.error(error);
-      alert('Không thể gửi lời chúc, vui lòng thử lại.');
-    }
-  };
+
 
   const renderCircularText = () => {
     if (!userName) return null;
@@ -435,7 +393,7 @@ export default function MainScreen() {
             <span>Đổi Avatar & Tên</span>
           </button>
           
-          <button className="control-btn" onClick={() => setIsWishesModalOpen(true)}>
+          <button className="control-btn" onClick={() => navigate('/wishes')}>
             <MessageCircleHeart size={18} />
             <span>Gửi lời chúc</span>
           </button>
@@ -479,46 +437,7 @@ export default function MainScreen() {
         </div>
       )}
 
-      {/* Wishes Modal (Tab) */}
-      {isWishesModalOpen && (
-        <div className="modal-overlay wishes-modal-overlay hide-on-download" onClick={() => setIsWishesModalOpen(false)}>
-          <div className="modal-content wishes-modal" onClick={e => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setIsWishesModalOpen(false)}><X size={24} /></button>
-            <h2>Bầu trời lời chúc</h2>
-            
-            <div className="wishes-view-area">
-              {wishes.map(wish => (
-                <div 
-                  key={wish.id} 
-                  className="floating-wish"
-                  style={{
-                    left: `${wish.left}%`,
-                    fontSize: `${wish.fontSize}px`,
-                    animationDuration: `${wish.duration}s`,
-                    animationDelay: `${wish.delay}s`
-                  }}
-                >
-                  {wish.content}
-                </div>
-              ))}
-            </div>
 
-            <form onSubmit={submitWish} className="wishes-form">
-              <input 
-                type="text" 
-                placeholder="Gửi một lời chúc..." 
-                value={newWish} 
-                onChange={(e) => setNewWish(e.target.value)}
-                maxLength={100}
-                required
-              />
-              <button type="submit" className="btn-send">
-                <Send size={18} />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );

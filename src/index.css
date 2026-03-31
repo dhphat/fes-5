@@ -755,3 +755,124 @@ body, html {
 }
 .btn-edit:hover { color: #00d2ff; }
 .btn-delete:hover { color: #ff4757; }
+
+/* Wishes Fullscreen Screen */
+.wishes-screen-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
+  overflow: hidden;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 50;
+  backdrop-filter: blur(5px);
+  font-family: 'Unbounded', sans-serif;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(0, 210, 255, 0.2);
+  border-color: #00d2ff;
+}
+
+.wishes-fullscreen-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.fullscreen-floating-wish {
+  position: absolute;
+  bottom: -50px;
+  white-space: nowrap;
+  color: #fff;
+  font-weight: 500;
+  text-shadow: 0 0 15px rgba(0, 210, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.8);
+  animation-name: floatUpWishesFS;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes floatUpWishesFS {
+  0% { transform: translateY(100px) scale(0.8); opacity: 0; }
+  5% { opacity: var(--opacityBase, 1); }
+  95% { opacity: var(--opacityBase, 1); }
+  100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+}
+
+.wishes-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 30px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  display: flex;
+  justify-content: center;
+  z-index: 20;
+}
+
+.wishes-bottom-form {
+  display: flex;
+  gap: 15px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.wishes-bottom-form input {
+  flex: 1;
+  padding: 15px 25px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.4);
+  border-radius: 30px;
+  color: white;
+  font-family: inherit;
+  font-size: 1.1rem;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.wishes-bottom-form input:focus {
+  border-color: #00d2ff;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+
+.btn-send-fullscreen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 30px;
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  border: none;
+  border-radius: 30px;
+  color: black;
+  font-weight: bold;
+  font-size: 1.1rem;
+  font-family: 'Unbounded', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+  transition: transform 0.2s;
+}
+
+.btn-send-fullscreen:hover {
+  transform: translateY(-2px);
+}
