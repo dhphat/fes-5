@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+:root {
+  --primary: #0b1a4a;
+  --secondary: #00d2ff;
+  --accent: #3a7bd5;
+  --text-light: #e0f7fa;
+  --bg-gradient: linear-gradient(135deg, #020024 0%, #090979 35%, #00d4ff 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif;
+  background: var(--primary);
+  color: var(--text-light);
+  user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Background Effects */
+.space-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.9), rgba(0,0,0,0));
+  background-size: 200px 200px;
+  opacity: 0.6;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.aurora {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 180deg at 50% 50%, rgba(0, 210, 255, 0.1) 0deg, rgba(58, 123, 213, 0.2) 180deg, rgba(0, 210, 255, 0.1) 360deg);
+  filter: blur(100px);
+  animation: rotateAurora 30s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes rotateAurora {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Elements */
+.canvas-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.connection-path {
+  fill: none;
+  stroke: var(--secondary);
+  stroke-width: 4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px var(--secondary));
+  transition: stroke 0.2s, filter 0.2s;
+  pointer-events: none;
+}
+
+.connection-hitpath {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 25;
+  cursor: pointer;
+  pointer-events: visibleStroke;
+}
+
+.path-hovered {
+  stroke: #ff4757 !important;
+  filter: drop-shadow(0 0 10px #ff4757) !important;
+}
+
+.drawing-path {
+  fill: none;
+  stroke: var(--secondary);
+  stroke-width: 4;
+  stroke-dasharray: 10 10;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px var(--secondary));
+  opacity: 0.7;
+}
+
+@keyframes dashFlow {
+  from { stroke-dashoffset: 20; }
+  to { stroke-dashoffset: 0; }
+}
+
+.node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.1s ease-out; /* For smooth dragging if any */
+}
+
+.avatar-node {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid var(--secondary);
+  box-shadow: 0 0 20px var(--secondary), inset 0 0 15px var(--secondary);
+  cursor: grab;
+}
+
+.avatar-node:active {
+  cursor: grabbing;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.project-node {
+  width: 90px;
+  height: 90px;
+  background: rgba(0, 210, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+  cursor: pointer;
+}
+
+.project-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none; /* prevent dragging image ghosting */
+}
+
+.avatar-active {
+  box-shadow: 0 0 40px #00d2ff, inset 0 0 40px #00d2ff;
+  border-color: #00d2ff;
+  animation: pulseAvatar 1s infinite alternate;
+}
+
+@keyframes pulseAvatar {
+  from { box-shadow: 0 0 40px #00d2ff, inset 0 0 30px #00d2ff; }
+  to { box-shadow: 0 0 60px #fff, inset 0 0 50px #fff; }
+}
+
+.project-connected {
+  border-color: #00d2ff;
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.9), inset 0 0 15px rgba(0, 210, 255, 0.5);
+}
+
+/* Download Button Container */
+.download-container {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.download-btn {
+  padding: 12px 30px;
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 8px 15px rgba(0, 210, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: all 0.5s ease;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(0, 210, 255, 0.5);
+}
+
+.download-btn:hover::before {
+  left: 100%;
+}
+
+.download-btn:active {
+  transform: translateY(1px);
+}
+
+/* Export Area (Hidden from view but used for html2canvas) */
+.export-wrapper {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 1080px;
+  height: 1920px;
+  background: radial-gradient(circle at center, #0B192C 0%, #000000 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.export-aurora {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 180deg at 50% 50%, rgba(0, 210, 255, 0.1) 0deg, rgba(58, 123, 213, 0.2) 180deg, rgba(0, 210, 255, 0.1) 360deg);
+  filter: blur(150px);
+}
+
+.hud-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: 
+    linear-gradient(90deg, rgba(0,210,255,0.03) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(rgba(0,210,255,0.03) 1px, transparent 1px) 0 0 / 50px 50px;
+  z-index: 1;
+}
