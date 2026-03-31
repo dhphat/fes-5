@@ -384,7 +384,7 @@ export default function MainScreen() {
         style={{ touchAction: 'none' }}
       >
         <div className="avatar-wrapper">
-          <img src={userAvatar} alt="Avatar" className="avatar-img" draggable="false" />
+          <img src={userAvatar} alt="Avatar" className="avatar-img" draggable="false" crossOrigin="anonymous" />
           {renderCircularText()}
         </div>
       </div>
@@ -412,7 +412,7 @@ export default function MainScreen() {
           }}
           style={{ touchAction: 'none' }}
         >
-          <img src={p.image_url} alt={p.label} className="project-img" draggable="false" />
+          <img src={p.image_url} alt={p.label} className="project-img" draggable="false" crossOrigin="anonymous" />
         </div>
       ))}
 

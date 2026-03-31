@@ -12,16 +12,27 @@ export default function WishesScreen() {
 
   useEffect(() => {
     const fetchWishes = async () => {
-      const { data, error } = await supabase.from('wishes').select('*').order('created_at', { ascending: false }).limit(60);
+      const isMobile = window.innerWidth <= 768;
+      const limitCount = isMobile ? 30 : 60;
+      
+      const { data, error } = await supabase.from('wishes').select('*').order('created_at', { ascending: false }).limit(limitCount);
       if (data && !error) {
-        const wishesWithMeta = data.map(wish => ({
-          ...wish,
-          left: Math.random() * 90, // 0% to 90%
-          fontSize: Math.random() * 14 + 16, // 16px to 30px
-          duration: Math.random() * 15 + 10, // 10s to 25s
-          delay: -(Math.random() * 20), // negative delay so they start immediately at different positions
-          opacityBase: Math.random() * 0.5 + 0.5 // 0.5 to 1
-        }));
+        const wishesWithMeta = data.map((wish, idx) => {
+          // Tiered distribution to ensure spread: 
+          // Divide screen into 3 zones and alternate
+          const zone = idx % 3; // 0, 1, 2
+          const leftBase = zone * 30; // 0, 30, 60
+          const leftOffset = Math.random() * 25; 
+          
+          return {
+            ...wish,
+            left: leftBase + leftOffset,
+            fontSize: isMobile ? (Math.random() * 10 + 14) : (Math.random() * 14 + 16),
+            duration: Math.random() * 15 + 12,
+            delay: -(Math.random() * 20),
+            opacityBase: Math.random() * 0.4 + 0.6
+          };
+        });
         setWishes(wishesWithMeta);
       }
     };
@@ -58,12 +69,13 @@ export default function WishesScreen() {
     
     // Optimistic UI push
     const tempId = Math.random().toString();
+    const isMobile = window.innerWidth <= 768;
     const optimisticWish = {
       id: tempId,
       content: w,
-      left: Math.random() * 90,
-      fontSize: Math.random() * 14 + 16,
-      duration: Math.random() * 15 + 10,
+      left: Math.random() * 80 + 5,
+      fontSize: isMobile ? 16 : 20,
+      duration: 15,
       delay: 0,
       opacityBase: 1
     };

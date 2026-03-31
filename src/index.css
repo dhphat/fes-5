@@ -948,6 +948,10 @@ body, html {
   transition: transform 0.2s;
 }
 
+.btn-send-fullscreen span { 
+  display: inline; 
+}
+
 .btn-send-fullscreen:hover {
   transform: translateY(-2px);
 }
@@ -1079,19 +1083,38 @@ body, html {
   }
 
   .wishes-bottom-form input {
-    padding: 12px 20px;
-    font-size: 0.95rem;
+    padding: 10px 15px;
+    font-size: 0.85rem;
   }
 
   .btn-send-fullscreen {
-    padding: 0 20px;
-    font-size: 0.95rem;
+    padding: 0 15px;
+    font-size: 0.9rem;
+    min-width: 50px;
+    justify-content: center;
   }
 
-  .btn-send-fullscreen span { display: none; }
+  .btn-send-fullscreen span { display: none !important; }
   
   .fullscreen-floating-wish {
-    font-size: 14px !important; /* Cap size on mobile */
+    font-size: 14px !important;
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+  }
+
+  /* SVG Render Fix: Filters often break on mobile or turn blue */
+  .canvas-layer filter {
+    display: none !important;
+  }
+
+  .connection-path {
+    stroke-width: 2 !important;
+    filter: none !important;
+    stroke: #00d2ff !important;
+    opacity: 0.7;
+  }
+
+  .drawing-path {
+    stroke-width: 2 !important;
   }
 
   /* Admin Dashboard */
