@@ -520,13 +520,13 @@ export default function MainScreen() {
 
         {/* Download Button / Instruction */}
         <div className="download-container" style={{ pointerEvents: 'auto' }}>
-          {connections.length > 0 ? (
+          {connections.length > 0 && !isTouchDevice() ? (
             <button className="download-btn" onClick={downloadImage}>
               Chụp ảnh kỷ niệm
             </button>
           ) : (
             <p className="interaction-hint">
-              {'ontouchstart' in window 
+              {isTouchDevice() 
                 ? 'Chạm vào dự án để tạo kết nối' 
                 : 'Click vào avatar để tạo kết nối với các dự án'}
             </p>
