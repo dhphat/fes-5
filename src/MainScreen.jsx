@@ -209,15 +209,13 @@ export default function MainScreen() {
       if (dragInfo.current.activeId) {
         const dx = e.clientX - dragInfo.current.startX;
         const dy = e.clientY - dragInfo.current.startY;
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
           dragInfo.current.moved = true;
         }
       }
     };
     const handlePointerUp = () => {
-      if (dragInfo.current.activeId) {
-        dragInfo.current.activeId = null;
-      }
+      dragInfo.current.activeId = null;
     };
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
@@ -235,6 +233,8 @@ export default function MainScreen() {
     const cy = start.y + dy / 2 + 100;
     return `M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
   };
+
+  const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   const handleNodePointerDown = (e, id) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -254,29 +254,29 @@ export default function MainScreen() {
     if (!dragInfo.current.moved) {
       setIsDrawing((prev) => !prev);
     }
+    dragInfo.current.moved = false;
   };
 
   const handleProjectClick = (pId) => {
-    // On mobile: if not in drawing mode, auto-enter drawing mode first
-    // Then on second tap (on a project), create the connection
-    if (!dragInfo.current.moved) {
+    const wasMoved = dragInfo.current.moved;
+    dragInfo.current.moved = false;
+    
+    if (wasMoved) return; // Was a drag, not a tap
+
+    if (isTouchDevice()) {
+      // Mobile: direct tap toggles connection
+      if (connections.includes(pId)) {
+        setConnections(prev => prev.filter(id => id !== pId));
+      } else {
+        setConnections(prev => [...prev, pId]);
+      }
+    } else {
+      // Desktop: require drawing mode
       if (isDrawing) {
-        // We're in drawing mode — create connection
         if (!connections.includes(pId)) {
-          setConnections([...connections, pId]);
+          setConnections(prev => [...prev, pId]);
         }
         setIsDrawing(false);
-      } else {
-        // On touch devices, also allow tapping project directly after avatar
-        // Check if this is a touch device and auto-connect
-        if ('ontouchstart' in window) {
-          if (!connections.includes(pId)) {
-            setConnections([...connections, pId]);
-          } else {
-            // Already connected - remove connection on tap
-            setConnections(prev => prev.filter(id => id !== pId));
-          }
-        }
       }
     }
   };
