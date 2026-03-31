@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { Send, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Starfield from './Starfield';
 import './index.css';
 
 export default function WishesScreen() {
@@ -80,7 +81,7 @@ export default function WishesScreen() {
 
   return (
     <div className="wishes-screen-container">
-      <div className="space-bg"></div>
+      <Starfield />
       <div className="aurora export-aurora"></div>
 
       {/* Nút quay lại */}

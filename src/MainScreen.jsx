@@ -3,6 +3,7 @@ import * as htmlToImage from 'html-to-image';
 import { supabase } from './lib/supabase';
 import { Camera, X, MessageCircleHeart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Starfield from './Starfield';
 import './index.css';
 
 export default function MainScreen() {
@@ -294,7 +295,7 @@ export default function MainScreen() {
 
   return (
     <div className="app-container">
-      <div className="space-bg"></div>
+      <Starfield />
       <div className="aurora"></div>
 
       <svg className="canvas-layer">
