@@ -425,7 +425,8 @@ body, html {
   font-weight: 600;
   font-size: 1rem;
   z-index: 100;
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+  width: 160px;
+  text-align: center;
   letter-spacing: 1px;
 }
 
@@ -659,11 +660,14 @@ body, html {
 }
 
 .admin-dashboard {
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   background: #050a14;
   padding: 30px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .admin-header {
@@ -701,6 +705,14 @@ body, html {
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 30px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-list-card, .admin-form-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-form-card, .admin-list-card {
@@ -748,7 +760,7 @@ body, html {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-height: 70vh;
+  flex: 1;
   overflow-y: auto;
   padding-right: 5px;
 }
@@ -947,7 +959,7 @@ body, html {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 60vh;
+  flex: 1;
   overflow-y: auto;
   padding-right: 10px;
 }
