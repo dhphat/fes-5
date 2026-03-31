@@ -257,12 +257,27 @@ export default function MainScreen() {
   };
 
   const handleProjectClick = (pId) => {
-    // Only connect if we didn't drag it
-    if (!dragInfo.current.moved && isDrawing) {
-      if (!connections.includes(pId)) {
-        setConnections([...connections, pId]);
+    // On mobile: if not in drawing mode, auto-enter drawing mode first
+    // Then on second tap (on a project), create the connection
+    if (!dragInfo.current.moved) {
+      if (isDrawing) {
+        // We're in drawing mode — create connection
+        if (!connections.includes(pId)) {
+          setConnections([...connections, pId]);
+        }
+        setIsDrawing(false);
+      } else {
+        // On touch devices, also allow tapping project directly after avatar
+        // Check if this is a touch device and auto-connect
+        if ('ontouchstart' in window) {
+          if (!connections.includes(pId)) {
+            setConnections([...connections, pId]);
+          } else {
+            // Already connected - remove connection on tap
+            setConnections(prev => prev.filter(id => id !== pId));
+          }
+        }
       }
-      setIsDrawing(false);
     }
   };
 
@@ -275,20 +290,53 @@ export default function MainScreen() {
       const controls = document.querySelectorAll('.hide-on-download');
       controls.forEach(c => c.style.display = 'none');
 
-      const dataUrl = await htmlToImage.toJpeg(document.body, {
-        quality: 0.95,
-        pixelRatio: window.devicePixelRatio || 2,
-        backgroundColor: '#0B192C'
+      // Use toPng for better mobile compatibility
+      const dataUrl = await htmlToImage.toPng(document.querySelector('.app-container'), {
+        quality: 1.0,
+        pixelRatio: 2,
+        backgroundColor: '#0B192C',
+        cacheBust: true,
+        fetchRequestInit: {
+          mode: 'cors',
+          cache: 'no-cache',
+        },
+        filter: (node) => {
+          // Remove elements with hide-on-download class
+          if (node.classList && node.classList.contains('hide-on-download')) {
+            return false;
+          }
+          return true;
+        }
       });
 
       controls.forEach(c => c.style.display = '');
 
+      // Use blob approach for better mobile support
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      // Try native share on mobile first
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], 'fpt-ses-moment.png', { type: 'image/png' });
+        const shareData = { files: [file] };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          return;
+        }
+      }
+
+      // Fallback: standard download
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.download = 'fpt-ses-moment.jpg';
-      link.href = dataUrl;
+      link.download = 'fpt-ses-moment.png';
+      link.href = url;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Failed to download image', err);
+      alert('Không thể tải ảnh. Vui lòng thử lại.');
     }
   };
 
@@ -438,7 +486,11 @@ export default function MainScreen() {
               Chụp ảnh kỷ niệm
             </button>
           ) : (
-            <p className="interaction-hint">Click vào avatar để tạo kết nối với các dự án</p>
+            <p className="interaction-hint">
+              {'ontouchstart' in window 
+                ? 'Chạm vào dự án để tạo kết nối' 
+                : 'Click vào avatar để tạo kết nối với các dự án'}
+            </p>
           )}
         </div>
       </div>
