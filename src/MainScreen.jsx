@@ -16,8 +16,35 @@ export default function MainScreen() {
   const [hasCustomAvatar, setHasCustomAvatar] = useState(false);
   const [userName, setUserName] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isAvatarUploaded, setIsAvatarUploaded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const targetDate = new Date('2026-04-02T00:00:00').getTime();
+    
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        setTimeLeft('Đã kết thúc');
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${days > 0 ? days + 'n ' : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const connectionsRef = useRef(connections);
   const isDrawingRef = useRef(isDrawing);
@@ -272,6 +299,7 @@ export default function MainScreen() {
       reader.onload = (ev) => {
         setUserAvatar(ev.target.result);
         setHasCustomAvatar(true);
+        setIsAvatarUploaded(true);
       };
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -297,6 +325,11 @@ export default function MainScreen() {
     <div className="app-container">
       <Starfield />
       <div className="aurora"></div>
+
+      {/* Countdown Timer */}
+      <div className="countdown-timer-overlay hide-on-download">
+        {timeLeft}
+      </div>
 
       <svg className="canvas-layer">
         <defs>
@@ -399,14 +432,16 @@ export default function MainScreen() {
           </button>
         </div>
 
-        {/* Download Button */}
-        {connections.length > 0 && (
-          <div className="download-container" style={{ pointerEvents: 'auto' }}>
+        {/* Download Button / Instruction */}
+        <div className="download-container" style={{ pointerEvents: 'auto' }}>
+          {connections.length > 0 ? (
             <button className="download-btn" onClick={downloadImage}>
               Chụp ảnh kỷ niệm
             </button>
-          </div>
-        )}
+          ) : (
+            <p className="interaction-hint">Click vào avatar để tạo kết nối với các dự án</p>
+          )}
+        </div>
       </div>
 
       {/* Profile Modal */}
@@ -418,7 +453,18 @@ export default function MainScreen() {
             
             <div className="form-group">
               <label>Ảnh đại diện của bạn:</label>
-              <input type="file" accept="image/*" onChange={onAvatarUpload} className="file-upload-input" />
+              <div className="custom-file-upload">
+                <input 
+                  type="file" 
+                  id="avatar-input"
+                  accept="image/*" 
+                  onChange={onAvatarUpload} 
+                  className="hidden-file-input" 
+                />
+                <label htmlFor="avatar-input" className="file-upload-label">
+                  {isAvatarUploaded ? '✅ Đã tải ảnh lên' : '📸 Chọn ảnh'}
+                </label>
+              </div>
             </div>
 
             <div className="form-group">

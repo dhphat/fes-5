@@ -197,6 +197,14 @@ body, html {
   pointer-events: auto;
 }
 
+.interaction-hint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
 .download-btn {
   padding: 12px 30px;
   background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
@@ -402,7 +410,52 @@ body, html {
   color: #b0c4de;
 }
 
+/* Countdown Timer */
+.countdown-timer-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  color: #00d2ff;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  z-index: 100;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+  letter-spacing: 1px;
+}
+
 /* Custom file upload input */
+.hidden-file-input {
+  display: none !important;
+}
+
+.file-upload-label {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background: rgba(0, 210, 255, 0.1);
+  border: 1px dashed #00d2ff;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background: rgba(0, 210, 255, 0.2);
+  border-style: solid;
+  transform: scale(1.02);
+}
+
 .file-upload-input {
   display: block;
   width: 100%;
