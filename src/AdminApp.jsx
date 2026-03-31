@@ -137,27 +137,23 @@ export default function AdminApp() {
   };
 
   const [compressing, setCompressing] = useState(false);
-  const [compressProgress, setCompressProgress] = useState({ total: 0, current: 0 });
+  const [compressProgress, setCompressProgress] = useState({ total: 0, current: 0, label: '' });
 
-  const compressImage = (file, maxWidth, maxHeight) => {
+  const compressImage = (file, maxWidth, maxHeight, maxSizeKB) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
+        URL.revokeObjectURL(img.src);
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
-        if (width > height) {
-          if (width > maxWidth) {
-            height *= maxWidth / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width *= maxHeight / height;
-            height = maxHeight;
-          }
+        // Scale down to fit within maxWidth x maxHeight
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
         }
 
         canvas.width = width;
@@ -165,50 +161,72 @@ export default function AdminApp() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, 'image/jpeg', 0.8);
+        // Iteratively reduce quality until under maxSizeKB
+        const tryCompress = (quality) => {
+          canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error('Canvas toBlob failed'));
+            const sizeKB = blob.size / 1024;
+            if (sizeKB > maxSizeKB && quality > 0.1) {
+              // Reduce quality and try again
+              tryCompress(quality - 0.05);
+            } else {
+              resolve(blob);
+            }
+          }, 'image/jpeg', quality);
+        };
+        tryCompress(0.85);
       };
       img.onerror = reject;
     });
   };
 
   const handleBulkCompress = async () => {
-    if (!window.confirm('Nén tất cả ảnh dự án về size 1000x1000? Quá trình này có thể mất vài phút.')) return;
+    if (!window.confirm('Nén tất cả ảnh dự án về ≤500x500, <200KB?\nẢnh cũ sẽ bị xoá khỏi Storage. Tiếp tục?')) return;
     
     setCompressing(true);
     const allItems = [...projects];
     if (defaultAvatar) allItems.push(defaultAvatar);
     
-    setCompressProgress({ total: allItems.length, current: 0 });
+    setCompressProgress({ total: allItems.length, current: 0, label: '' });
 
     for (let i = 0; i < allItems.length; i++) {
         const item = allItems[i];
+        setCompressProgress(prev => ({ ...prev, current: i, label: item.label }));
         try {
-            // 1. Download
-            const fileName = item.image_url.split('/').pop().split('?')[0]; // Remove timestamp if any
-            const { data, error } = await supabase.storage.from('images').download(fileName);
+            // 1. Extract old file name
+            const oldFileName = item.image_url.split('/').pop().split('?')[0];
+            
+            // 2. Download old image
+            const { data, error } = await supabase.storage.from('images').download(oldFileName);
             if (error) throw error;
 
-            // 2. Resize
-            const compressedBlob = await compressImage(data, 1000, 1000);
+            // 3. Compress: max 500x500, under 200KB
+            const compressedBlob = await compressImage(data, 500, 500, 200);
 
-            // 3. Re-upload with upsert
-            const { error: uploadError } = await supabase.storage.from('images').upload(fileName, compressedBlob, { upsert: true });
+            // 4. Upload with new filename
+            const newFileName = `compressed_${Date.now()}_${i}.jpg`;
+            const { error: uploadError } = await supabase.storage.from('images').upload(newFileName, compressedBlob, {
+              contentType: 'image/jpeg',
+            });
             if (uploadError) throw uploadError;
 
-            // 4. Update DB with timestamp to bust cache
-            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
-            const freshUrl = `${publicUrl}?t=${Date.now()}`;
-            await supabase.from('projects').update({ image_url: freshUrl }).eq('id', item.id);
+            // 5. Get new public URL
+            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(newFileName);
 
+            // 6. Update DB with new URL
+            await supabase.from('projects').update({ image_url: publicUrl }).eq('id', item.id);
+
+            // 7. Delete old file from storage
+            await supabase.storage.from('images').remove([oldFileName]);
+
+            console.log(`✅ ${item.label}: ${(compressedBlob.size/1024).toFixed(0)}KB`);
         } catch (e) {
-            console.error('Lỗi khi nén item:', item.label, e);
+            console.error('❌ Lỗi khi nén:', item.label, e);
         }
         setCompressProgress(prev => ({ ...prev, current: i + 1 }));
     }
 
-    alert('Đã hoàn thành nén tất cả ảnh!');
+    alert(`Hoàn thành! Đã nén ${allItems.length} ảnh.`);
     setCompressing(false);
     fetchProjects();
   };
@@ -246,8 +264,8 @@ export default function AdminApp() {
         <div>
           <h2>Quản lý Project Nodes</h2>
           {compressing && (
-            <div style={{ color: '#00d2ff', fontSize: '0.9rem', marginTop: '5px' }}>
-              ⏳ Đang nén ảnh: {compressProgress.current}/{compressProgress.total}...
+            <div style={{ color: '#00d2ff', fontSize: '0.85rem', marginTop: '5px' }}>
+              ⏳ Đang nén: {compressProgress.current}/{compressProgress.total} {compressProgress.label && `— ${compressProgress.label}`}
               <div style={{ width: '200px', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '5px' }}>
                 <div style={{ width: `${(compressProgress.current / compressProgress.total) * 100}%`, height: '100%', background: '#00d2ff', borderRadius: '2px', transition: 'width 0.3s' }} />
               </div>
