@@ -425,8 +425,10 @@ body, html {
   font-weight: 600;
   font-size: 1rem;
   z-index: 100;
-  width: 160px;
+  width: fit-content;
+  min-width: 160px;
   text-align: center;
+  white-space: nowrap;
   letter-spacing: 1px;
 }
 
@@ -1014,4 +1016,121 @@ body, html {
 .btn-delete-wish:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Main Screen */
+  .countdown-timer-overlay {
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    min-width: 120px;
+  }
+
+  .top-controls {
+    top: 10px;
+    left: 10px;
+    gap: 8px;
+    padding: 0;
+    max-width: 60%; /* Avoid overlapping with timer */
+  }
+
+  .control-btn {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+
+  .control-btn span {
+    display: none; /* Hide text on very small screens, show icons only */
+  }
+  
+  @media (min-width: 480px) {
+    .control-btn span { display: inline; }
+  }
+
+  .node.avatar-node {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .node.project-node {
+    width: 60px;
+    height: 60px;
+  }
+
+  .download-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .interaction-hint {
+    font-size: 0.7rem;
+    padding: 0 20px;
+  }
+
+  /* Wishes Screen */
+  .wishes-bottom-bar {
+    padding: 15px;
+  }
+
+  .wishes-bottom-form {
+    gap: 10px;
+  }
+
+  .wishes-bottom-form input {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  .btn-send-fullscreen {
+    padding: 0 20px;
+    font-size: 0.95rem;
+  }
+
+  .btn-send-fullscreen span { display: none; }
+  
+  .fullscreen-floating-wish {
+    font-size: 14px !important; /* Cap size on mobile */
+  }
+
+  /* Admin Dashboard */
+  .admin-dashboard {
+    padding: 15px;
+    overflow-y: auto; /* Let dashboard scroll if needed */
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .admin-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .admin-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .admin-projects-grid {
+    max-height: none; /* Let the page scroll */
+  }
+
+  .admin-wishes-list {
+    max-height: none;
+  }
+
+  .admin-wish-item {
+    padding: 12px;
+    flex-wrap: wrap; /* Column layout if needed */
+    gap: 10px;
+  }
+
+  .admin-wish-content {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .admin-wish-content p {
+    font-size: 0.85rem;
+  }
 }
