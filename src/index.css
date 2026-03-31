@@ -1067,13 +1067,45 @@ html:has(.admin-dashboard) {
   }
 
   .download-btn {
-    padding: 10px 20px;
-    font-size: 0.9rem;
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    white-space: nowrap;
   }
 
   .interaction-hint {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     padding: 0 20px;
+  }
+
+  /* Modal mobile fixes */
+  .modal-content {
+    padding: 20px;
+    width: 85%;
+  }
+
+  .modal-content h2 {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+
+  /* Prevent iOS auto-zoom on input focus */
+  .modal-content input[type="text"],
+  .modal-content input[type="file"] {
+    font-size: 16px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  .file-upload-label {
+    font-size: 0.8rem;
+    padding: 12px;
   }
 
   /* Wishes Screen */

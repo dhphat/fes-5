@@ -285,23 +285,56 @@ export default function MainScreen() {
     setConnections(prev => prev.filter(id => id !== pId));
   };
 
+  const convertImageToBase64 = (imgEl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      // Add cache buster to bypass cached non-CORS responses
+      const src = imgEl.src.includes('?') ? `${imgEl.src}&_cb=${Date.now()}` : `${imgEl.src}?_cb=${Date.now()}`;
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = canvas.toDataURL('image/png');
+          resolve(dataUrl);
+        } catch (e) {
+          console.warn('Failed to convert image:', e);
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  };
+
   const downloadImage = async () => {
     try {
-      const controls = document.querySelectorAll('.hide-on-download');
-      controls.forEach(c => c.style.display = 'none');
+      // 1. Pre-convert all images to base64 to avoid cross-origin issues
+      const container = document.querySelector('.app-container');
+      const allImages = container.querySelectorAll('img');
+      const originalSrcs = [];
+      
+      for (const imgEl of allImages) {
+        originalSrcs.push({ el: imgEl, src: imgEl.src });
+        if (imgEl.src.startsWith('http') && !imgEl.src.startsWith('data:')) {
+          const base64 = await convertImageToBase64(imgEl);
+          if (base64) {
+            imgEl.src = base64;
+          }
+        }
+      }
 
-      // Use toPng for better mobile compatibility
-      const dataUrl = await htmlToImage.toPng(document.querySelector('.app-container'), {
-        quality: 1.0,
+      // Wait a tick for images to settle
+      await new Promise(r => setTimeout(r, 100));
+
+      // 2. Capture
+      const dataUrl = await htmlToImage.toPng(container, {
         pixelRatio: 2,
         backgroundColor: '#0B192C',
-        cacheBust: true,
-        fetchRequestInit: {
-          mode: 'cors',
-          cache: 'no-cache',
-        },
         filter: (node) => {
-          // Remove elements with hide-on-download class
           if (node.classList && node.classList.contains('hide-on-download')) {
             return false;
           }
@@ -309,13 +342,15 @@ export default function MainScreen() {
         }
       });
 
-      controls.forEach(c => c.style.display = '');
+      // 3. Restore original image sources
+      for (const { el, src } of originalSrcs) {
+        el.src = src;
+      }
 
-      // Use blob approach for better mobile support
+      // 4. Download / Share
       const response = await fetch(dataUrl);
       const blob = await response.blob();
 
-      // Try native share on mobile first
       if (navigator.share && navigator.canShare) {
         const file = new File([blob], 'fpt-ses-moment.png', { type: 'image/png' });
         const shareData = { files: [file] };
@@ -325,7 +360,6 @@ export default function MainScreen() {
         }
       }
 
-      // Fallback: standard download
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = 'fpt-ses-moment.png';
