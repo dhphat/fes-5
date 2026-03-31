@@ -206,16 +206,19 @@ export default function MainScreen() {
   useEffect(() => {
     const handlePointerMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
-      if (dragInfo.current.activeId) {
+      // Only activate drag after movement threshold (deferred drag)
+      if (dragInfo.current.pendingId && !dragInfo.current.activeId) {
         const dx = e.clientX - dragInfo.current.startX;
         const dy = e.clientY - dragInfo.current.startY;
         if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
+          dragInfo.current.activeId = dragInfo.current.pendingId;
           dragInfo.current.moved = true;
         }
       }
     };
     const handlePointerUp = () => {
       dragInfo.current.activeId = null;
+      dragInfo.current.pendingId = null;
     };
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
@@ -240,8 +243,10 @@ export default function MainScreen() {
     const rect = e.currentTarget.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
+    mousePos.current = { x: e.clientX, y: e.clientY };
     dragInfo.current = {
-      activeId: id,
+      pendingId: id,    // Store as pending, NOT active
+      activeId: null,    // Don't activate drag yet
       offsetX: e.clientX - cx,
       offsetY: e.clientY - cy,
       startX: e.clientX,
