@@ -661,9 +661,16 @@ body, html {
   cursor: pointer;
 }
 
+/* Override global overflow:hidden when admin page is active */
+body:has(.admin-dashboard),
+html:has(.admin-dashboard) {
+  overflow: auto;
+  overflow-x: hidden;
+}
+
 .admin-dashboard {
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   background: #050a14;
   padding: 30px;
   display: flex;
@@ -713,7 +720,6 @@ body, html {
 .admin-list-card, .admin-form-card {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .admin-form-card, .admin-list-card {
@@ -761,8 +767,6 @@ body, html {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  flex: 1;
-  overflow-y: auto;
   padding-right: 5px;
 }
 
