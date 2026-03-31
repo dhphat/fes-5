@@ -311,8 +311,8 @@ export default function MainScreen() {
     if (!userName) return null;
     return (
       <svg className="circular-text-svg" viewBox="0 0 200 200">
-        <path id="circlePath" d="M 100, 100 m -98, 0 a 98,98 0 1,1 196,0 a 98,98 0 1,1 -196,0" fill="none" />
-        <text fill="#00d2ff" fontSize="9" fontWeight="600" letterSpacing="0.8">
+        <path id="circlePath" d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" fill="none" />
+        <text fill="#00d2ff" fontSize="10" fontWeight="600" letterSpacing="0.8">
           <textPath href="#circlePath" textAnchor="middle" startOffset="50%">
             {userName.toUpperCase()}
           </textPath>
