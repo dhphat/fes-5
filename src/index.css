@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700&display=swap');
 
 :root {
   --primary: #0b1a4a;
@@ -18,7 +18,7 @@ body, html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Unbounded', sans-serif;
   background: var(--primary);
   color: var(--text-light);
   user-select: none;
@@ -208,7 +208,7 @@ body, html {
   border: none;
   border-radius: 30px;
   color: white;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Unbounded', sans-serif;
   font-weight: 600;
   font-size: 1.1rem;
   letter-spacing: 1px;
@@ -307,7 +307,7 @@ body, html {
   border: 1px solid rgba(0, 210, 255, 0.3);
   border-radius: 8px;
   color: #fff;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Unbounded', sans-serif;
   font-size: 0.95rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
@@ -416,6 +416,42 @@ body, html {
   margin-bottom: 8px;
   font-size: 0.95rem;
   color: #b0c4de;
+}
+
+/* Custom file upload input */
+.file-upload-input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed rgba(0, 210, 255, 0.5);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.file-upload-input::file-selector-button {
+  padding: 8px 16px;
+  margin-right: 15px;
+  border: none;
+  background: #00d2ff;
+  color: black;
+  border-radius: 6px;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.file-upload-input::file-selector-button:hover {
+  background: #3a7bd5;
+  color: white;
+}
+
+.file-upload-input:hover {
+  border-color: #00d2ff;
+  background: rgba(0, 210, 255, 0.05);
 }
 
 .form-group input[type="text"],

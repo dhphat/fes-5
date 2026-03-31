@@ -460,8 +460,7 @@ export default function MainScreen() {
             
             <div className="form-group">
               <label>Ảnh đại diện của bạn:</label>
-              <input type="file" accept="image/*" onChange={onAvatarUpload} />
-              <p className="note">Ảnh sẽ chỉ được xử lý ở máy bạn, không lưu lên máy chủ.</p>
+              <input type="file" accept="image/*" onChange={onAvatarUpload} className="file-upload-input" />
             </div>
 
             <div className="form-group">
